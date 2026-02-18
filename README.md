@@ -394,7 +394,7 @@ Contribuições são bem-vindas para melhorias, correções ou evolução do pro
 Se este projeto foi útil para você e quiser apoiar o desenvolvimento, considere realizar uma doação via PIX:
 ```bash
 00020101021126580014br.gov.bcb.pix013622e795c5-00bb-4b8e-a78b-8214845f233e5204000053039865802BR5925JANDERSON FERREIRA DE PAU6009SAO PAULO622905251KHQ76EFTK7DJQQVV7XN5WACC63045B6F
-
+```
 ## ⚠️ Aviso Legal
 
 Este software é fornecido "como está", sem garantias de qualquer tipo.  
