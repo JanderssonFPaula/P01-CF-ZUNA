@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0"><i class="bi bi-cart"></i> Listas de Compras</h2>
+                        <p class="text-muted mb-0">Gerencie suas listas e pague direto das suas contas</p>
+                    </div>
+                    <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#modalNovaLista">
+                        <i class="bi bi-plus-circle"></i> Nova Lista
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<!-- Listas Ativas -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h3><i class="bi bi-clock"></i> Listas Pendentes</h3>
+    </div>
+    
+    {% if listas_ativas %}
+        {% for lista in listas_ativas %}
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100 border-warning border-2">
+                <div class="card-body">
+                    <h5 class="card-title">{{ lista.nome }}</h5>
+                    <p class="card-text text-muted">
+                        <i class="bi bi-calendar"></i> {{ lista.data_criacao[:10] }}
+                    </p>
+                    <h4 class="text-warning">R$ {{ "%.2f"|format(lista.total) }}</h4>
+                    <small class="text-muted">{{ lista.itens_lista|length }} itens</small>
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="{{ url_for('ver_lista', id=lista.id) }}" class="btn btn-primary">
+                            <i class="bi bi-eye"></i> Ver Detalhes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="bi bi-info-circle"></i> Nenhuma lista pendente. Crie uma nova lista para começar!
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Listas Concluídas -->
+<div class="row">
+    <div class="col-12">
+        <h3><i class="bi bi-check-circle"></i> Listas Concluídas Recentes</h3>
+    </div>
+    
+    {% if listas_concluidas %}
+        {% for lista in listas_concluidas %}
+        <div class="col-md-12 mb-2">
+            <div class="card">
+                <div class="card-body py-2">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <strong>{{ lista.nome }}</strong>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">
+                                <i class="bi bi-calendar-check"></i> {{ lista.data_conclusao[:10] if lista.data_conclusao else '' }}
+                            </small>
+                        </div>
+                        <div class="col-md-3">
+                            <small class="text-muted">
+                                <i class="bi bi-bank"></i> {{ lista.contas.nome if lista.contas else 'N/A' }}
+                            </small>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <span class="badge bg-success">R$ {{ "%.2f"|format(lista.total) }}</span>
+                            <div class="mt-2">
+                                <a href="{{ url_for('ver_lista', id=lista.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('deletar_lista', id=lista.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Deletar a lista {{ lista.nome }}?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-secondary text-center">
+                <i class="bi bi-inbox"></i> Nenhuma lista concluída ainda
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Modal Nova Lista -->
+<div class="modal fade" id="modalNovaLista" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nova Lista de Compras</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('nova_lista') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nome da Lista</label>
+                        <input type="text" class="form-control" name="nome" required 
+                               placeholder="Ex: Mercado da Semana, Material Escolar">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Criar Lista</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

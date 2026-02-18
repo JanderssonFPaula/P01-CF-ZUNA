@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login – Zuna</title>
+    <link rel="icon" type="image/png" href="{{ url_for('img_file', filename='Logos de Membros.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #210d3e 0%, #804FB3 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .login-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 15px;
+        }
+        .login-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 45px 40px;
+            width: 100%;
+            max-width: 430px;
+        }
+        .logo-icon {
+            width: 70px; height: 70px;
+            background: linear-gradient(135deg, #210d3e, #804FB3);
+            border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2rem; color: #fff;
+        }
+        .form-control:focus { border-color: #0d6efd; box-shadow: 0 0 0 3px rgba(13,110,253,.15); }
+        .btn-entrar { background: linear-gradient(135deg, #0d6efd, #0a3d8f); border: none; padding: 13px; font-size: 1.05rem; border-radius: 10px; }
+        .btn-entrar:hover { opacity: .9; }
+        .footer-auth {
+            background: rgba(0,0,0,.25);
+            color: rgba(255,255,255,.7);
+            text-align: center;
+            padding: 14px;
+            font-size: 0.82rem;
+        }
+        .footer-auth .developer { color: #fff; font-weight: 600; }
+    </style>
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="logo-icon">
+            <i class="bi bi-bank2"></i>
+        </div>
+        <h2 class="text-center fw-bold mb-1">Zuna</h2>
+        <p class="text-center text-muted mb-4">Faça login para continuar</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">E-mail</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                    <input type="email" name="email" class="form-control" placeholder="seu@email.com" required autofocus>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Senha</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
+                    <input type="password" name="senha" id="senha" class="form-control" placeholder="••••••" required>
+                    <button class="btn btn-outline-secondary" type="button" onclick="toggleSenha()">
+                        <i class="bi bi-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-entrar text-white fw-bold">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Entrar
+                </button>
+            </div>
+        </form>
+
+        <hr class="my-4">
+
+        <p class="text-center mb-0">
+            Não tem conta?
+            <a href="{{ url_for('cadastro') }}" class="fw-semibold text-primary">Cadastre-se grátis</a>
+        </p>
+    </div>
+</div>
+
+<div class="footer-auth">
+    Desenvolvido por <span class="developer">Jandersson F de Paula - Instagram: @ConsultyD</span> &nbsp;·&nbsp; 2026
+    
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleSenha() {
+        const inp = document.getElementById('senha');
+        const ico = document.getElementById('eyeIcon');
+        if (inp.type === 'password') {
+            inp.type = 'text';
+            ico.className = 'bi bi-eye-slash';
+        } else {
+            inp.type = 'password';
+            ico.className = 'bi bi-eye';
+        }
+    }
+</script>
+</body>
+</html>

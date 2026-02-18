@@ -1,0 +1,138 @@
+/* Estilos gerais */
+body {
+    background-color: #e7e7e7;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Cards */
+.card {
+    border-radius: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+}
+
+/* Navbar */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+/* Botões */
+.btn {
+    border-radius: 8px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Badges */
+.badge {
+    padding: 6px 12px;
+    font-weight: 500;
+}
+
+/* Tabelas */
+.table {
+    margin-bottom: 0;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0,0,0,0.03);
+}
+
+/* Modal */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+}
+
+.modal-header {
+    border-radius: 15px 15px 0 0;
+}
+
+/* Formulários */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    padding: 10px 15px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #210d3e;
+    box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Cores de destaque */
+.text-success {
+    color: #00bf63 !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+.bg-success {
+    background-color: #00bf63 !important;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .display-4 {
+        font-size: 2.5rem;
+    }
+    
+    .card-body h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Estilo para cards de conta */
+.card.border-start {
+    border-left-width: 5px !important;
+}
+
+/* Sombras suaves */
+.shadow-sm {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+}
+
+.shadow {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+}

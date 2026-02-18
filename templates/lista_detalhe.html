@@ -1,0 +1,396 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <a href="{{ url_for('listas_compras') }}" class="btn btn-outline-secondary mb-3">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2><i class="bi bi-cart"></i> {{ lista.nome }}</h2>
+                        <p class="text-muted mb-0">
+                            <i class="bi bi-calendar"></i> Criada em: {{ lista.data_criacao[:16] }}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <h3 class="mb-0 text-primary">Total: R$ {{ "%.2f"|format(total) }}</h3>
+                        <small class="text-muted">{{ itens|length }} itens</small>
+                        {% if lista.concluida %}
+                        <div><span class="badge bg-success mt-2">Concluida</span></div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="row mb-4">
+    <div class="col-12">
+        {% if not lista.concluida %}
+        <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#modalAdicionarItem">
+            <i class="bi bi-plus-circle"></i> Adicionar Item
+        </button>
+        <button class="btn btn-outline-secondary btn-lg" data-bs-toggle="modal" data-bs-target="#modalImportarNota">
+            <i class="bi bi-receipt"></i> Importar Nota
+        </button>
+        {% if itens %}
+        <button id="btnPagarLista" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#modalPagar">
+            <i class="bi bi-credit-card"></i> Pagar Lista (R$ {{ "%.2f"|format(total) }})
+        </button>
+        {% endif %}
+        {% endif %}
+        <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#modalWhatsappLista">
+            <i class="bi bi-whatsapp"></i> Enviar Relatorio
+        </button>
+        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalDeletar">
+            <i class="bi bi-trash"></i> Deletar Lista
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="bi bi-list-ul"></i> Itens</h4>
+                {% if not lista.concluida and itens %}
+                <small class="text-muted">Total selecionado: <strong id="totalSelecionadoTopo">R$ {{ "%.2f"|format(total) }}</strong></small>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if itens %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                {% if not lista.concluida %}
+                                <th class="text-center">Selecionar</th>
+                                {% endif %}
+                                <th>Item</th>
+                                <th class="text-center">Quantidade</th>
+                                <th class="text-end">Valor Unit.</th>
+                                <th class="text-end">Subtotal</th>
+                                {% if not lista.concluida %}
+                                <th class="text-center">Acoes</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in itens %}
+                            {% set subtotal = item.valor * item.quantidade %}
+                            <tr>
+                                {% if not lista.concluida %}
+                                <td class="text-center">
+                                    <input
+                                        type="checkbox"
+                                        class="form-check-input item-checkbox"
+                                        data-item-id="{{ item.id }}"
+                                        data-subtotal="{{ "%.2f"|format(subtotal) }}"
+                                        checked
+                                    >
+                                </td>
+                                {% endif %}
+                                <td>{{ item.descricao }}</td>
+                                <td class="text-center">{{ item.quantidade }}</td>
+                                <td class="text-end">R$ {{ "%.2f"|format(item.valor) }}</td>
+                                <td class="text-end"><strong>R$ {{ "%.2f"|format(subtotal) }}</strong></td>
+                                {% if not lista.concluida %}
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalEditarItem{{ item.id }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <form method="POST" action="{{ url_for('deletar_item_lista', id=lista.id, item_id=item.id) }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Remover este item?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                                {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-primary">
+                                {% if not lista.concluida %}
+                                <td colspan="4"><strong>TOTAL GERAL</strong></td>
+                                {% else %}
+                                <td colspan="3"><strong>TOTAL GERAL</strong></td>
+                                {% endif %}
+                                <td class="text-end"><h4 class="mb-0">R$ {{ "%.2f"|format(total) }}</h4></td>
+                                {% if not lista.concluida %}
+                                <td></td>
+                                {% endif %}
+                            </tr>
+                            {% if not lista.concluida %}
+                            <tr class="table-light">
+                                <td colspan="4"><strong>TOTAL SELECIONADO</strong></td>
+                                <td class="text-end"><h5 id="totalSelecionadoRodape" class="mb-0">R$ {{ "%.2f"|format(total) }}</h5></td>
+                                <td></td>
+                            </tr>
+                            {% endif %}
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <p class="mt-3">Nenhum item adicionado ainda</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if not lista.concluida %}
+<div class="modal fade" id="modalImportarNota" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-secondary text-white">
+                <h5 class="modal-title">Importar Itens da Nota Fiscal</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('importar_nota_lista', id=lista.id) }}" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Foto da nota fiscal</label>
+                        <input type="file" class="form-control" name="nota_fiscal" accept=".jpg,.jpeg,.png,.webp,.bmp,.tif,.tiff" required>
+                    </div>
+                    <small class="text-muted">
+                        Dica: use foto nitida e com boa iluminacao para melhorar a leitura dos itens.
+                    </small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-secondary">Ler Nota e Adicionar Itens</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalAdicionarItem" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Adicionar Item</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('adicionar_item_lista', id=lista.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Descricao do Item</label>
+                        <input type="text" class="form-control" name="descricao" required placeholder="Ex: Arroz 5kg">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Quantidade</label>
+                            <input type="number" class="form-control" name="quantidade" min="1" value="1" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Valor Unitario</label>
+                            <input type="number" class="form-control" name="valor" step="0.01" required placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Adicionar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% for item in itens %}
+<div class="modal fade" id="modalEditarItem{{ item.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Editar Item</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('editar_item_lista', id=lista.id, item_id=item.id) }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Descricao do Item</label>
+                        <input type="text" class="form-control" name="descricao" value="{{ item.descricao }}" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Quantidade</label>
+                            <input type="number" class="form-control" name="quantidade" min="1" value="{{ item.quantidade }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Valor Unitario</label>
+                            <input type="number" class="form-control" name="valor" step="0.01" value="{{ item.valor }}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if not lista.concluida and itens %}
+<div class="modal fade" id="modalPagar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Pagar Lista de Compras</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('pagar_lista', id=lista.id) }}">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <h5>Valor selecionado: <span id="totalSelecionadoModal">R$ {{ "%.2f"|format(total) }}</span></h5>
+                        <p class="mb-0">{{ itens|length }} itens na lista</p>
+                    </div>
+
+                    <input type="hidden" id="selectedItemIdsInput" name="selected_item_ids" value="">
+
+                    <div class="mb-3">
+                        <label class="form-label">Escolha a conta para debito:</label>
+                        <select class="form-select" name="conta_id" required>
+                            <option value="">Selecione uma conta...</option>
+                            {% for conta in contas %}
+                            <option value="{{ conta.id }}">
+                                {{ conta.nome }} ({{ conta.banco }}) - Saldo: R$ {{ "%.2f"|format(conta.saldo) }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Atencao:</strong>
+                        Sera registrada uma saida com o valor dos itens selecionados.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button id="btnConfirmarPagamento" type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Confirmar Pagamento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="modal fade" id="modalDeletar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirmar Exclusao</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja deletar a lista <strong>{{ lista.nome }}</strong>?</p>
+                <p class="text-danger">Esta acao nao pode ser desfeita!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" action="{{ url_for('deletar_lista', id=lista.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Sim, Deletar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalWhatsappLista" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Enviar Relatorio da Lista</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('enviar_relatorio_whatsapp') }}">
+                <div class="modal-body">
+                    <input type="hidden" name="tipo" value="lista">
+                    <input type="hidden" name="referencia_id" value="{{ lista.id }}">
+                    <input type="hidden" name="redirect_to" value="{{ url_for('ver_lista', id=lista.id) }}">
+                    <label class="form-label">Numero WhatsApp (com DDI e DDD)</label>
+                    <input type="text" class="form-control" name="numero" required placeholder="Ex: 5562999999999">
+                    <small class="text-muted">O sistema enviara status, itens e total desta lista.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if not lista.concluida and itens %}
+<script>
+    (function () {
+        const checkboxes = Array.from(document.querySelectorAll('.item-checkbox'));
+        const totalTopo = document.getElementById('totalSelecionadoTopo');
+        const totalRodape = document.getElementById('totalSelecionadoRodape');
+        const totalModal = document.getElementById('totalSelecionadoModal');
+        const btnPagarLista = document.getElementById('btnPagarLista');
+        const btnConfirmarPagamento = document.getElementById('btnConfirmarPagamento');
+        const selectedItemIdsInput = document.getElementById('selectedItemIdsInput');
+
+        function moeda(valor) {
+            return 'R$ ' + valor.toFixed(2);
+        }
+
+        function atualizarTotalSelecionado() {
+            let total = 0;
+            const selecionados = [];
+
+            checkboxes.forEach((checkbox) => {
+                if (checkbox.checked) {
+                    const subtotal = parseFloat(checkbox.dataset.subtotal || '0');
+                    total += subtotal;
+                    selecionados.push(checkbox.dataset.itemId);
+                }
+            });
+
+            if (totalTopo) totalTopo.textContent = moeda(total);
+            if (totalRodape) totalRodape.textContent = moeda(total);
+            if (totalModal) totalModal.textContent = moeda(total);
+            if (btnPagarLista) btnPagarLista.innerHTML = '<i class="bi bi-credit-card"></i> Pagar Lista (' + moeda(total) + ')';
+            if (selectedItemIdsInput) selectedItemIdsInput.value = selecionados.join(',');
+
+            const semSelecionados = selecionados.length === 0;
+            if (btnConfirmarPagamento) btnConfirmarPagamento.disabled = semSelecionados;
+        }
+
+        checkboxes.forEach((checkbox) => {
+            checkbox.addEventListener('change', atualizarTotalSelecionado);
+        });
+
+        atualizarTotalSelecionado();
+    })();
+</script>
+{% endif %}
+{% endblock %}

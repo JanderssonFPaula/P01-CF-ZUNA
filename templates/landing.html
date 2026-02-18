@@ -1,0 +1,477 @@
+{% extends "base.html" %}
+
+{% block title %}Zuna - Controle Financeiro{% endblock %}
+{% set hide_layout_chrome = true %}
+
+{% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --z-bg: #080a16;
+        --z-bg-soft: #210d3e;
+        --z-panel: rgba(255, 255, 255, 0.03);
+        --z-border: rgba(255, 255, 255, 0.12);
+        --z-primary: #00d4ff;
+        --z-accent: #38f2a3;
+        --z-alert: #ffc857;
+        --z-text: #eef2ff;
+        --z-muted: #9fb0cf;
+    }
+
+    body {
+        background: radial-gradient(circle at 20% 20%, rgba(0, 212, 255, 0.18), transparent 35%),
+            radial-gradient(circle at 80% 80%, rgba(56, 242, 163, 0.15), transparent 35%),
+            linear-gradient(160deg, #060811 0%, #0b1022 45%, #131c34 100%);
+        color: var(--z-text);
+        font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .landing-wrap {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .fx-line {
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.9), transparent);
+        opacity: 0;
+        animation: streak 9s infinite;
+        pointer-events: none;
+    }
+
+    .fx-line.one { top: 14%; animation-delay: 0s; }
+    .fx-line.two { top: 52%; animation-delay: 3s; }
+    .fx-line.three { top: 78%; animation-delay: 6s; }
+
+    @keyframes streak {
+        0%, 100% { opacity: 0; transform: translateX(-100%); }
+        6% { opacity: 1; transform: translateX(0%); }
+        12% { opacity: 0; transform: translateX(100%); }
+    }
+
+    .brand-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 200, 87, 0.15);
+        border: 1px solid rgba(255, 200, 87, 0.45);
+        border-radius: 100px;
+        color: var(--z-alert);
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .pulse-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--z-alert);
+        animation: dotPulse 1.5s infinite;
+    }
+
+    @keyframes dotPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.35); opacity: 0.6; }
+    }
+
+    .hero-title {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: clamp(44px, 7vw, 82px);
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        margin: 20px 0 20px;
+    }
+
+    .hero-title .highlight {
+        background: linear-gradient(135deg, var(--z-primary) 0%, var(--z-accent) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hero-sub {
+        max-width: 760px;
+        color: var(--z-muted);
+        font-size: 18px;
+        line-height: 1.7;
+    }
+
+    .cta-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 34px;
+    }
+
+    .btn-zuna {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 10px;
+        padding: 14px 24px;
+        text-decoration: none;
+        transition: all 0.25s ease;
+        position: relative;
+        overflow: hidden;
+        font-family: 'Rajdhani', sans-serif;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
+
+    .btn-zuna::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-zuna:hover::before { left: 100%; }
+
+    .btn-main {
+        color: #041122;
+        background: linear-gradient(135deg, var(--z-primary) 0%, var(--z-accent) 100%);
+        box-shadow: 0 10px 36px rgba(0, 212, 255, 0.22);
+    }
+
+    .btn-main:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 44px rgba(0, 212, 255, 0.3);
+    }
+
+    .btn-alt {
+        color: var(--z-text);
+        border: 1px solid rgba(0, 212, 255, 0.45);
+        background: rgba(0, 212, 255, 0.08);
+    }
+
+    .btn-alt:hover {
+        transform: translateY(-2px);
+        background: rgba(0, 212, 255, 0.14);
+    }
+
+    .status-box {
+        margin-top: 32px;
+        border: 1px solid rgba(56, 242, 163, 0.5);
+        background: rgba(56, 242, 163, 0.08);
+        border-radius: 12px;
+        padding: 14px 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        color: #b7f7dc;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .status-live {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--z-accent);
+        box-shadow: 0 0 14px var(--z-accent);
+        animation: dotBlink 1.8s infinite;
+    }
+
+    .dev-warning {
+        margin-top: 6px;
+        border: 1px solid rgba(255, 200, 87, 0.45);
+        background: rgba(255, 200, 87, 0.1);
+        border-radius: 12px;
+        padding: 14px 16px;
+        color: #ffe8b2;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .github-link {
+        margin-top: 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--z-primary);
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .github-link:hover {
+        text-decoration: underline;
+        color: #7eeaff;
+    }
+
+    @keyframes dotBlink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+
+    .section-title {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: clamp(34px, 4.5vw, 52px);
+        margin-bottom: 12px;
+    }
+
+    .section-sub {
+        color: var(--z-muted);
+        max-width: 680px;
+    }
+
+    .module-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 18px;
+        margin-top: 36px;
+    }
+
+    .module-card {
+        background: var(--z-panel);
+        border: 1px solid var(--z-border);
+        border-radius: 14px;
+        padding: 20px;
+        backdrop-filter: blur(5px);
+        transform: translateY(24px);
+        opacity: 0;
+        transition: all 0.55s ease;
+    }
+
+    .module-card.show {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .module-card h4 {
+        margin-bottom: 8px;
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 25px;
+    }
+
+    .module-card p {
+        margin: 0;
+        color: var(--z-muted);
+        font-size: 14px;
+    }
+
+    .roadmap {
+        margin-top: 84px;
+    }
+
+    .timeline {
+        margin-top: 30px;
+        display: grid;
+        gap: 14px;
+    }
+
+    .timeline-item {
+        border: 1px solid var(--z-border);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 16px 18px;
+    }
+
+    .timeline-item h5 {
+        margin-bottom: 8px;
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 24px;
+    }
+
+    .timeline-item ul {
+        margin: 0;
+        padding-left: 18px;
+        color: var(--z-muted);
+        font-size: 14px;
+    }
+
+    .contact-box {
+        margin-top: 44px;
+        border: 1px solid var(--z-border);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 20px;
+    }
+
+    .contact-box h4 {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 26px;
+        margin-bottom: 14px;
+    }
+
+    .contact-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .contact-item {
+        color: var(--z-muted);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: fit-content;
+    }
+
+    .contact-item:hover {
+        color: var(--z-text);
+    }
+
+    @media (max-width: 768px) {
+        .hero-sub { font-size: 16px; }
+        .cta-row { flex-direction: column; align-items: stretch; }
+        .btn-zuna { justify-content: center; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="landing-wrap">
+    <div class="fx-line one"></div>
+    <div class="fx-line two"></div>
+    <div class="fx-line three"></div>
+
+    <section class="container py-5">
+        <div class="brand-tag">
+            <span class="pulse-dot"></span>
+            <span>PROJETO ZUNA EM EVOLUÇÃO</span>
+        </div>
+
+        <h1 class="hero-title">
+            Controle Financeiro<br>
+            <span class="highlight">com foco em execução</span>
+        </h1>
+
+        <p class="hero-sub">
+            O Zuna organiza contas, transações e listas de compras em um único sistema web com Supabase.
+            Você acompanha o saldo por categoria, registra movimentações e ainda envia relatórios pelo WhatsApp.
+        </p>
+
+        <div class="cta-row">
+            <a href="{{ url_for('login') }}" class="btn-zuna btn-main">
+                <i class="bi bi-box-arrow-in-right"></i>
+                <span>Acessar Sistema Zuna</span>
+            </a>
+            <a href="#modulos" class="btn-zuna btn-alt">
+                <i class="bi bi-grid-1x2"></i>
+                <span>Ver Modulos</span>
+            </a>
+        </div>
+
+        <div class="status-box">
+            <span class="status-live"></span>
+            <span>Sistema ativo para gestão financeira, controle de listas e geração de relatórios.</span>
+        </div>
+        
+    </section>
+
+        <section class="container py-0">
+        <div class="dev-warning">
+            Sistema em desenvolvimento. Os dados podem ser alterados ou reiniciados durante os testes.
+            Para uso seguro, clone o repositório oficial no GitHub e execute o projeto localmente.
+            <br>
+            <a class="github-link" href="https://github.com/JanderssonFPaula/P01-CF-ZUNA" target="_blank" rel="noopener noreferrer">
+                <i class="bi bi-github"></i>
+                <span>Projeto Zuna</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="container py-5" id="modulos">
+        <h2 class="section-title">Resumo do Projeto</h2>
+        <p class="section-sub">
+            Estrutura desenvolvida para uso diário, com dados na nuvem, fluxo de operação simplificado e recursos que apoiam a rotina financeira.
+        </p>
+
+        <div class="module-grid">
+            <article class="module-card reveal">
+                <h4>Dashboard Financeiro</h4>
+                <p>Visualização por categorias, com saldo total consolidado, contas organizadas e acesso rápido aos detalhes.</p>
+            </article>
+            <article class="module-card reveal">
+                <h4>Gestão de Contas</h4>
+                <p>Cadastro por banco e finalidade, histórico de transações e atualização de saldo em tempo real.</p>
+            </article>
+            <article class="module-card reveal">
+                <h4>Listas de Compras</h4>
+                <p>Criação de listas, itens com quantidade e valor, pagamento direto da conta e histórico de conclusão.</p>
+            </article>
+            <article class="module-card reveal">
+                <h4>WhatsApp e OCR</h4>
+                <p>Envio de relatórios e importação de nota fiscal por imagem para acelerar o cadastro de itens.</p>
+            </article>
+        </div>
+
+        <div class="roadmap">
+            <h3 class="section-title">Evolução do Zuna</h3>
+            <p class="section-sub">Panorama rápido das entregas mais relevantes desta versão.</p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <h5>v1.0 Base do sistema</h5>
+                    <ul>
+                        <li>Controle financeiro completo com contas e transações.</li>
+                        <li>Autenticação de usuário e página de perfil.</li>
+                    </ul>
+                </div>
+                <div class="timeline-item">
+                    <h5>v1.1 Expansão de compras</h5>
+                    <ul>
+                        <li>Implementação de listas de compras com cálculo automático de valores e vinculação de pagamento por conta.</li>
+                        <li>Edição e exclusão de itens e listas concluídas.</li>
+                    </ul>
+                </div>
+                <div class="timeline-item">
+                    <h5>v2.0 Integrações</h5>
+                    <ul>
+                        <li>Relatórios por WhatsApp (geral, por conta e por lista).</li>
+                        <li>Importação de nota fiscal por OCR e parser de itens.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-box">
+            <h4>Redes Sociais e Contato</h4>
+            <div class="contact-list">
+                <a class="contact-item" href="https://www.instagram.com/consultyd/" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-instagram"></i>
+                    <span>Instagram: @consultyd</span>
+                </a>
+                <a class="contact-item" href="https://wa.me/556299725327" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-whatsapp"></i>
+                    <span>WhatsApp: +55 62 9972-5327</span>
+                </a>
+                <a class="contact-item" href="mailto:contato@consultyd.com.br">
+                    <i class="bi bi-envelope"></i>
+                    <span>Email: contato@consultyd.com.br</span>
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) entry.target.classList.add('show');
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -80px 0px' });
+
+    reveals.forEach((el) => observer.observe(el));
+</script>
+{% endblock %}
+
