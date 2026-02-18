@@ -361,12 +361,66 @@ git push heroku main
 - Documentação Supabase: https://supabase.com/docs
 - Documentação Flask: https://flask.palletsprojects.com/
 
-## 📝 Licença
+## 📄 Licença de Uso – Uso Pessoal
 
-Livre para uso pessoal e modificações!
+Este projeto é disponibilizado gratuitamente para **uso pessoal e educacional**.
+
+### ✅ Permissões
+
+Você pode:
+
+- Utilizar este projeto para fins pessoais  
+- Estudar o código-fonte  
+- Modificar o código para uso próprio  
+- Adaptar para aprendizado  
+
+### ❌ Restrições
+
+Você **não pode**:
+
+- Comercializar este projeto  
+- Vender o sistema ou partes dele  
+- Distribuir versões modificadas para fins comerciais  
+- Utilizar este projeto como produto pago ou SaaS  
+
+Qualquer uso comercial requer autorização expressa do autor.
 
 ---
 
-**Desenvolvido com ❤️ usando Flask + Supabase**
+## 🤝 Contribuições
 
-🎉 **Aproveite seu novo sistema de controle financeiro!**
+Contribuições são bem-vindas para melhorias, correções ou evolução do projeto.
+
+Se este projeto foi útil para você e quiser apoiar o desenvolvimento, considere realizar uma doação via PIX:
+```bash
+00020101021126580014br.gov.bcb.pix013622e795c5-00bb-4b8e-a78b-8214845f233e5204000053039865802BR5925JANDERSON FERREIRA DE PAU6009SAO PAULO622905251KHQ76EFTK7DJQQVV7XN5WACC63045B6F
+
+## ⚠️ Aviso Legal
+
+Este software é fornecido "como está", sem garantias de qualquer tipo.  
+O autor não se responsabiliza por danos, perdas financeiras ou uso indevido do sistema.
+
+---
+
+## 👨‍💻 Desenvolvedor
+
+**Jandersson F de Paula**
+
+Desenvolvido utilizando:
+
+- Python (Flask)
+- Supabase
+- PostgreSQL
+
+---
+
+## 🌐 Contato & Redes Sociais
+
+- GitHub: https://github.com/JanderssonFPaula
+- LinkedIn: https://www.linkedin.com/in/jandersson-ferreira-de-paula-891843110/
+- Instagram: https://www.instagram.com/consultyd/
+- Email: contato@consultyd.com.br
+
+---
+
+🎉 **Aproveite seu sistema de controle financeiro!**
